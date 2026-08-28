@@ -1,0 +1,53 @@
+name: florapp
+description: "A new Flutter project."
+
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  firebase_core: ^4.7.0
+  cloud_firestore: ^6.3.0
+  google_fonts: ^6.2.1
+  firebase_auth: ^6.4.0
+  image_picker: ^1.2.2
+  image_cropper: ^12.2.1
+  intl: ^0.20.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.7
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/florapp_logo_hijau.png"
+
+flutter_native_splash:
+  color: "#ffffff"
+
+  image: assets/images/florapp_logo_putih.png
+
+  branding: assets/images/florapp_logo_putih.png
+
+  android: true
+  ios: true
+
+  android_12:
+    image: assets/images/florapp_logo_putih.png
+    icon_background_color: "#ffffff"
+    color: "#ffffff"
