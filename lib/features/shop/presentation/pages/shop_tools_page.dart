@@ -2,6 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/app_network_image.dart';
+import 'my_products_page.dart';
+import 'seller_orders_page.dart';
+import 'sell_page.dart';
 import 'shop_profile_page.dart';
 
 class ShopToolsPage extends StatelessWidget {
@@ -12,7 +16,7 @@ class ShopToolsPage extends StatelessWidget {
     final currentUser = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: const Color(0xFFF8FAF9),
       body: SafeArea(
         child: currentUser == null
             ? const Center(child: Text('User belum login'))
@@ -23,41 +27,41 @@ class ShopToolsPage extends StatelessWidget {
                     .snapshots(),
                 builder: (context, snapshot) {
                   String storeName = 'Toko Florapp Saya';
-                  String storeDescription = 'Penjual tanaman Florapp';
+                  String storeDescription = 'Penjual tanaman hias Florapp';
                   String storePhoto = '';
                   bool storeIsOpen = true;
 
                   if (snapshot.hasData && snapshot.data!.exists) {
                     final data = snapshot.data!.data() as Map<String, dynamic>;
-
-                    storeName =
-                        data['storeName'] ??
+                    storeName = data['storeName'] ??
                         data['name'] ??
                         'Toko Florapp Saya';
-                    storeDescription =
-                        data['storeDescription'] ?? 'Penjual tanaman Florapp';
-                    storePhoto = data['storePhoto'] ?? data['photoUrl'] ?? '';
+                    storeDescription = data['storeDescription'] ??
+                        'Penjual tanaman hias Florapp';
+                    storePhoto =
+                        data['storePhoto'] ?? data['photoUrl'] ?? '';
                     storeIsOpen = data['storeIsOpen'] ?? true;
                   }
 
                   return SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.only(bottom: 30),
+                    padding: const EdgeInsets.only(bottom: 40),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // HEADER
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.fromLTRB(20, 22, 20, 34),
+                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
                           decoration: const BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [Color(0xFF4CAF50), Color(0xFF81C784)],
+                              colors: [Color(0xFF2E7D32), Color(0xFF4CAF50)],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(34),
-                              bottomRight: Radius.circular(34),
+                              bottomLeft: Radius.circular(32),
+                              bottomRight: Radius.circular(32),
                             ),
                           ),
                           child: Column(
@@ -65,81 +69,78 @@ class ShopToolsPage extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.18,
-                                      ),
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    child: IconButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      icon: const Icon(
-                                        Icons.arrow_back,
-                                        color: Colors.white,
-                                      ),
+                                  IconButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    icon: const Icon(
+                                      Icons.arrow_back,
+                                      color: Colors.white,
                                     ),
                                   ),
-                                  const SizedBox(width: 14),
-                                  const Expanded(
-                                    child: Text(
-                                      'Fitur Toko',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 30,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    'Alat & Pengaturan Toko',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 10),
-                              const Text(
-                                'Kelola pengaturan dan fitur seller Florapp',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 15,
+                              const SizedBox(height: 6),
+                              const Padding(
+                                padding: EdgeInsets.only(left: 12),
+                                child: Text(
+                                  'Konfigurasi fitur operasional dan promosi seller',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
 
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
 
+                        // STORE PROFILE CARD
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Container(
-                            width: double.infinity,
                             padding: const EdgeInsets.all(18),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(26),
+                              borderRadius: BorderRadius.circular(22),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withValues(alpha: 0.04),
-                                  blurRadius: 12,
+                                  blurRadius: 10,
                                   offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
                             child: Row(
                               children: [
-                                CircleAvatar(
-                                  radius: 34,
-                                  backgroundColor: Colors.green.withValues(
-                                    alpha: 0.12,
+                                Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                        color: Colors.green, width: 1.5),
                                   ),
-                                  backgroundImage: storePhoto.isNotEmpty
-                                      ? NetworkImage(storePhoto)
-                                      : null,
-                                  child: storePhoto.isEmpty
-                                      ? const Icon(
-                                          Icons.storefront,
-                                          color: Colors.green,
-                                          size: 34,
-                                        )
-                                      : null,
+                                  child: CircleAvatar(
+                                    radius: 28,
+                                    backgroundColor: Colors.green.shade50,
+                                    child: ClipOval(
+                                      child: AppNetworkImage(
+                                        imageUrl: storePhoto,
+                                        width: 56,
+                                        height: 56,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                                 const SizedBox(width: 14),
                                 Expanded(
@@ -152,49 +153,46 @@ class ShopToolsPage extends StatelessWidget {
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
-                                          fontSize: 20,
+                                          fontSize: 17,
                                           fontWeight: FontWeight.bold,
+                                          color: Color(0xFF1E293B),
                                         ),
                                       ),
-                                      const SizedBox(height: 5),
+                                      const SizedBox(height: 3),
                                       Text(
                                         storeDescription,
-                                        maxLines: 2,
+                                        maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color: Colors.grey.shade600,
-                                          fontSize: 13,
-                                          height: 1.3,
+                                          fontSize: 12,
                                         ),
                                       ),
-                                      const SizedBox(height: 10),
+                                      const SizedBox(height: 8),
                                       Container(
                                         padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
+                                          horizontal: 10,
+                                          vertical: 4,
                                         ),
                                         decoration: BoxDecoration(
                                           color: storeIsOpen
-                                              ? Colors.green.withValues(
-                                                  alpha: 0.12,
-                                                )
-                                              : Colors.red.withValues(
-                                                  alpha: 0.12,
-                                                ),
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
+                                              ? Colors.green
+                                                  .withValues(alpha: 0.12)
+                                              : Colors.red
+                                                  .withValues(alpha: 0.12),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                         child: Text(
                                           storeIsOpen
-                                              ? 'Toko Buka'
-                                              : 'Toko Tutup',
+                                              ? '● Toko Aktif / Buka'
+                                              : '● Toko Tutup Sementara',
                                           style: TextStyle(
                                             color: storeIsOpen
-                                                ? Colors.green
+                                                ? Colors.green.shade800
                                                 : Colors.red,
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 12,
+                                            fontSize: 11,
                                           ),
                                         ),
                                       ),
@@ -206,16 +204,15 @@ class ShopToolsPage extends StatelessWidget {
                           ),
                         ),
 
-                        const SizedBox(height: 28),
+                        const SizedBox(height: 24),
 
-                        buildSectionTitle('Identitas Toko'),
-
+                        buildSectionTitle('Manajemen Operasional'),
                         buildMenuTile(
                           context,
-                          icon: Icons.store_mall_directory,
+                          icon: Icons.storefront_outlined,
                           title: 'Profil Toko',
                           subtitle:
-                              'Atur nama toko, logo, deskripsi, dan alamat',
+                              'Atur nama toko, logo, deskripsi, alamat, dan jam buka',
                           color: Colors.green,
                           onTap: () {
                             Navigator.push(
@@ -226,93 +223,79 @@ class ShopToolsPage extends StatelessWidget {
                             );
                           },
                         ),
-
                         buildMenuTile(
                           context,
-                          icon: Icons.verified,
-                          title: 'Verifikasi Penjual',
-                          subtitle: 'Lengkapi data agar toko lebih dipercaya',
+                          icon: Icons.receipt_long_outlined,
+                          title: 'Pesanan Masuk Toko',
+                          subtitle: 'Pantau pesanan diproses, dikirim, dan selesai',
                           color: Colors.blue,
                           onTap: () {
-                            showComingSoon(context, 'Verifikasi Penjual');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const SellerOrdersPage(),
+                              ),
+                            );
                           },
                         ),
-
-                        const SizedBox(height: 18),
-
-                        buildSectionTitle('Keuangan Toko'),
-
                         buildMenuTile(
                           context,
-                          icon: Icons.account_balance_wallet,
-                          title: 'Riwayat Saldo',
-                          subtitle: 'Lihat pemasukan dan penarikan saldo',
+                          icon: Icons.inventory_2_outlined,
+                          title: 'Katalog Tanaman Saya',
+                          subtitle: 'Lihat daftar tanaman yang sedang kamu jual',
                           color: Colors.teal,
                           onTap: () {
-                            showComingSoon(context, 'Riwayat Saldo');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MyProductsPage(),
+                              ),
+                            );
                           },
                         ),
-
                         buildMenuTile(
                           context,
-                          icon: Icons.payments,
-                          title: 'Rekening Penarikan',
-                          subtitle: 'Atur rekening untuk pencairan saldo',
+                          icon: Icons.add_circle_outline,
+                          title: 'Tambah Tanaman Baru',
+                          subtitle: 'Upload foto tanaman, deskripsi, dan harga jual',
                           color: Colors.orange,
                           onTap: () {
-                            showComingSoon(context, 'Rekening Penarikan');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const SellPage(),
+                              ),
+                            );
                           },
                         ),
 
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 20),
 
-                        buildSectionTitle('Operasional Toko'),
-
+                        buildSectionTitle('Pusat Bantuan & Panduan'),
                         buildMenuTile(
                           context,
-                          icon: Icons.local_shipping,
-                          title: 'Pengaturan Pengiriman',
-                          subtitle: 'Kelola jasa kirim dan area pengiriman',
-                          color: Colors.purple,
-                          onTap: () {
-                            showComingSoon(context, 'Pengaturan Pengiriman');
-                          },
-                        ),
-
-                        buildMenuTile(
-                          context,
-                          icon: Icons.discount,
-                          title: 'Promo Toko',
-                          subtitle: 'Buat voucher dan promo untuk pembeli',
-                          color: Colors.redAccent,
-                          onTap: () {
-                            showComingSoon(context, 'Promo Toko');
-                          },
-                        ),
-
-                        buildMenuTile(
-                          context,
-                          icon: Icons.analytics,
-                          title: 'Analitik Toko',
-                          subtitle: 'Lihat performa produk dan penjualan',
-                          color: Colors.brown,
-                          onTap: () {
-                            showComingSoon(context, 'Analitik Toko');
-                          },
-                        ),
-
-                        const SizedBox(height: 18),
-
-                        buildSectionTitle('Bantuan'),
-
-                        buildMenuTile(
-                          context,
-                          icon: Icons.support_agent,
-                          title: 'Pusat Bantuan Seller',
-                          subtitle: 'Bantuan untuk mengelola toko Florapp',
+                          icon: Icons.local_shipping_outlined,
+                          title: 'Panduan Ekspedisi & Resi',
+                          subtitle: 'Cara input nomor resi dan pengiriman kilat',
                           color: Colors.indigo,
                           onTap: () {
-                            showComingSoon(context, 'Pusat Bantuan Seller');
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20)),
+                                title: const Text('Panduan Ekspedisi'),
+                                content: const Text(
+                                  'Gunakan layanan pengiriman kilat (JNE YES / SiCepat BEST / Instant) terutama untuk tanaman langka atau berdaun tipis agar tiba dalam keadaan segar.',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx),
+                                    child: const Text('Tutup'),
+                                  ),
+                                ],
+                              ),
+                            );
                           },
                         ),
                       ],
@@ -326,10 +309,14 @@ class ShopToolsPage extends StatelessWidget {
 
   Widget buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Text(
         title,
-        style: const TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF1E293B),
+        ),
       ),
     );
   }
@@ -343,54 +330,52 @@ class ShopToolsPage extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
-              offset: const Offset(0, 4),
+              offset: const Offset(0, 3),
             ),
           ],
         ),
         child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 18,
-            vertical: 8,
-          ),
+          onTap: onTap,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           leading: Container(
-            padding: const EdgeInsets.all(11),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: color),
+            child: Icon(icon, color: color, size: 22),
           ),
           title: Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: Color(0xFF1E293B),
+            ),
           ),
-          subtitle: Text(subtitle),
+          subtitle: Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade600,
+            ),
+          ),
           trailing: const Icon(
-            Icons.arrow_forward_ios,
-            size: 16,
+            Icons.chevron_right,
+            size: 20,
             color: Colors.grey,
           ),
-          onTap: onTap,
         ),
-      ),
-    );
-  }
-
-  void showComingSoon(BuildContext context, String featureName) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$featureName belum dibuat'),
-        behavior: SnackBarBehavior.floating,
       ),
     );
   }

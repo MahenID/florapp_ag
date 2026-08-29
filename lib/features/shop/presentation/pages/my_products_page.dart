@@ -1,10 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'sell_page.dart';
 import 'edit_product_page.dart';
+import '../../../../shared/services/firestore_service.dart';
 import '../../../../shared/utils/currency_formatter.dart';
+import '../../../../shared/widgets/app_network_image.dart';
 
 class MyProductsPage extends StatelessWidget {
   const MyProductsPage({super.key});
@@ -36,16 +38,14 @@ class MyProductsPage extends StatelessWidget {
     if (confirm != true) return;
 
     try {
-      await FirebaseFirestore.instance
-          .collection('products')
-          .doc(productId)
-          .delete();
+      await FirestoreService().deleteProduct(productId: productId);
 
       if (!context.mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Produk berhasil dihapus'),
+          backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -55,6 +55,7 @@ class MyProductsPage extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Gagal menghapus produk: $e'),
+          backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -69,12 +70,9 @@ class MyProductsPage extends StatelessWidget {
       backgroundColor: Colors.grey.shade100,
       body: SafeArea(
         child: currentUser == null
-            ? const Center(child: Text('User belum login'))
-            : StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('products')
-                    .where('userId', isEqualTo: currentUser.uid)
-                    .snapshots(),
+            ? const Center(child: Text('Pengguna belum login'))
+            : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: FirestoreService().getMyProducts(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -166,11 +164,11 @@ class MyProductsPage extends StatelessWidget {
                                       value: products.length.toString(),
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
+                                  const SizedBox(width: 14),
                                   Expanded(
                                     child: buildHeaderStat(
-                                      icon: Icons.visibility,
-                                      title: 'Status',
+                                      icon: Icons.storefront,
+                                      title: 'Status Toko',
                                       value: 'Aktif',
                                     ),
                                   ),
@@ -185,14 +183,13 @@ class MyProductsPage extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Expanded(
-                                child: Text(
-                                  'Daftar Produk',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              const Text(
+                                'Daftar Tanaman',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                               ElevatedButton.icon(
@@ -237,13 +234,13 @@ class MyProductsPage extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Column(
                               children: products.map((doc) {
-                                final data = doc.data() as Map<String, dynamic>;
+                                final data = doc.data();
 
-                                final name = data['name'] ?? 'Tanpa Nama';
-                                final image = data['image'] ?? '';
+                                final name = (data['name'] ?? 'Tanpa Nama').toString();
+                                final image = (data['image'] ?? '').toString();
                                 final description =
-                                    data['description'] ??
-                                    'Tidak ada deskripsi';
+                                    (data['description'] ??
+                                    'Tidak ada deskripsi').toString();
                                 final price = data['price'] ?? 0;
 
                                 return buildProductCard(
@@ -423,17 +420,12 @@ class MyProductsPage extends StatelessWidget {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
             child: Stack(
               children: [
-                image.isNotEmpty
-                    ? Image.network(
-                        image,
-                        width: double.infinity,
-                        height: 180,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return buildImageError();
-                        },
-                      )
-                    : buildImageError(),
+                AppNetworkImage(
+                  imageUrl: image,
+                  width: double.infinity,
+                  height: 180,
+                  fit: BoxFit.cover,
+                ),
                 Positioned(
                   top: 14,
                   left: 14,
@@ -459,54 +451,50 @@ class MyProductsPage extends StatelessWidget {
               ],
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      formatRupiah(price),
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-
                 const SizedBox(height: 8),
-
-                Text(
-                  formatRupiah(price),
-                  style: const TextStyle(
-                    color: Colors.green,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
                 Text(
                   description,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 14,
-                    height: 1.4,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600, height: 1.4),
                 ),
-
                 const SizedBox(height: 18),
-
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () async {
-                          await Navigator.push(
+                        onPressed: () {
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) => EditProductPage(
@@ -520,51 +508,37 @@ class MyProductsPage extends StatelessWidget {
                           );
                         },
                         style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.green,
                           side: const BorderSide(color: Colors.green),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                        icon: const Icon(
-                          Icons.edit,
-                          color: Colors.green,
-                          size: 18,
-                        ),
+                        icon: const Icon(Icons.edit, size: 18),
                         label: const Text(
                           'Edit',
-                          style: TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
-
                     const SizedBox(width: 12),
-
                     Expanded(
                       child: ElevatedButton.icon(
-                        onPressed: () {
-                          deleteProduct(context, productId);
-                        },
+                        onPressed: () => deleteProduct(context, productId),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
+                          backgroundColor: Colors.red.shade50,
+                          foregroundColor: Colors.red,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                        icon: const Icon(
-                          Icons.delete,
-                          color: Colors.white,
-                          size: 18,
-                        ),
+                        icon: const Icon(Icons.delete_outline, size: 18),
                         label: const Text(
                           'Hapus',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -574,17 +548,6 @@ class MyProductsPage extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget buildImageError() {
-    return Container(
-      width: double.infinity,
-      height: 180,
-      color: Colors.green.withValues(alpha: 0.10),
-      child: const Center(
-        child: Icon(Icons.image_not_supported, color: Colors.green, size: 50),
       ),
     );
   }

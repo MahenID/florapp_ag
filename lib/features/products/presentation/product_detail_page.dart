@@ -1,9 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/product_model.dart';
 import '../../../shared/utils/currency_formatter.dart';
 import '../../../shared/services/cart_service.dart';
+import '../../../shared/services/favorite_service.dart';
+import '../../../shared/widgets/app_network_image.dart';
 
 class ProductDetailPage extends StatelessWidget {
   final Product product;
@@ -53,15 +55,12 @@ class ProductDetailPage extends StatelessWidget {
                   SizedBox(
                     height: 360,
                     width: double.infinity,
-                    child: imageUrl.isNotEmpty
-                        ? Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return buildImagePlaceholder();
-                            },
-                          )
-                        : buildImagePlaceholder(),
+                    child: AppNetworkImage(
+                      imageUrl: imageUrl,
+                      width: double.infinity,
+                      height: 360,
+                      fit: BoxFit.cover,
+                    ),
                   ),
 
                   Container(
@@ -91,14 +90,39 @@ class ProductDetailPage extends StatelessWidget {
                   Positioned(
                     top: 16,
                     right: 16,
-                    child: buildCircleButton(
-                      icon: Icons.favorite_border,
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Fitur favorite belum dibuat'),
-                            behavior: SnackBarBehavior.floating,
-                          ),
+                    child: StreamBuilder<bool>(
+                      stream: FavoriteService().isFavorite(product.id),
+                      builder: (context, snapshot) {
+                        final isFav = snapshot.data ?? false;
+                        return buildCircleButton(
+                          icon: isFav ? Icons.favorite : Icons.favorite_border,
+                          iconColor: isFav ? Colors.red : Colors.white,
+                          onTap: () async {
+                            try {
+                              final added = await FavoriteService().toggleFavorite(product);
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    added
+                                        ? 'Ditambahkan ke wishlist'
+                                        : 'Dihapus dari wishlist',
+                                  ),
+                                  duration: const Duration(seconds: 2),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            } catch (e) {
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Gagal: $e'),
+                                  backgroundColor: Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
+                          },
                         );
                       },
                     ),
@@ -947,10 +971,7 @@ class ProductDetailPage extends StatelessWidget {
     );
   }
 
-  Widget buildCircleButton({
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
+  Widget buildCircleButton({ required IconData icon, Color iconColor = Colors.white, required VoidCallback onTap }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.35),
@@ -1019,3 +1040,7 @@ class ProductDetailPage extends StatelessWidget {
     );
   }
 }
+
+
+
+
